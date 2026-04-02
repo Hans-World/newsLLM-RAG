@@ -11,10 +11,10 @@ both pipelines must use the same models or retrieval silently breaks.
 from sentence_transformers import SentenceTransformer
 from fastembed import SparseTextEmbedding
 
-DENSE_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
+DENSE_MODEL = "intfloat/multilingual-e5-large-instruct" # "intfloat/multilingual-e5-large-instruct" / "jinaai/jina-embeddings-v3"
 SPARSE_MODEL = "Qdrant/bm25"
 
-dense_embedder = SentenceTransformer(DENSE_MODEL) # Semantic Matching
+dense_embedder = SentenceTransformer(DENSE_MODEL, trust_remote_code=True) # Semantic Matching
 sparse_embedder = SparseTextEmbedding(model_name=SPARSE_MODEL)  # Keyword Matching
 
 def embed_chunks(chunks):

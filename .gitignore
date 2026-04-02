@@ -11,3 +11,6 @@ wheels/
 
 # .env storing the api keys
 .env
+
+# Qdrant runtime storage
+qdrant_storage/

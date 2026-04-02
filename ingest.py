@@ -19,3 +19,26 @@ When to run:
 Usage:
     uv run ingest.py
 """
+from indexing import load, chunk, embed_chunks
+
+if __name__ == "__main__":
+    print("=== INDEXING PIPELINE ===")
+    
+    # Stage 1: Load
+    PATH = "./notebooks/data/news.json"
+    docs = load(PATH) # Potentially need to be replaced after we receive the data
+    print(f"✓ Loaded {len(docs)} documents")
+    
+    # Stage 2: Chunk
+    all_chunks = []
+    for doc in docs:
+        all_chunks.extend(chunk(doc))
+    print(f"✓ Turned {len(docs)} documents into {len(all_chunks)} chunks")
+    
+    # Stage 3: Embed
+    dense_vectors, sparse_vectors = embed_chunks(all_chunks)
+    print(f"✓ Dense:  {len(dense_vectors)} chunks, dimension={len(dense_vectors[0])}")
+    print(f"✓ Sparse: {len(sparse_vectors)} chunks, example nnz={len(sparse_vectors[0].indices)} non-zero values")
+    
+    # Stage 4: Store
+    

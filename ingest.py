@@ -18,8 +18,13 @@ When to run:
 
 Usage:
     uv run ingest.py
+
+Note: 
+    Call the Qdrant API and show me all the collections
+    command: curl -s http://localhost:6333/collections
+             curl -s http://localhost:6333/healthz
 """
-from indexing import load, chunk, embed_chunks
+from indexing import load, chunk, embed_chunks, create_collection, delet_collection, store_chunks
 
 if __name__ == "__main__":
     print("=== INDEXING PIPELINE ===")
@@ -41,4 +46,9 @@ if __name__ == "__main__":
     print(f"✓ Sparse: {len(sparse_vectors)} chunks, example nnz={len(sparse_vectors[0].indices)} non-zero values")
     
     # Stage 4: Store
-    
+    COLLECTION = "testing_v1"
+    DENSE_VECTOR_DIM = len(dense_vectors[0])
+    create_collection(COLLECTION, DENSE_VECTOR_DIM)
+    store_chunks(COLLECTION, all_chunks, dense_vectors, sparse_vectors)
+    print(f"✓ Stored {len(all_chunks)} chunks into '{COLLECTION}'")
+    # delete_collection(COLLECTION)

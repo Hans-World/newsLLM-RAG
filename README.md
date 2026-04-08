@@ -37,7 +37,7 @@ curl -s http://localhost:6333/healthz
 ### 3. Run the indexing pipeline
 
 ```bash
-uv run ingest.py
+uv run index.py
 ```
 
 This runs the full indexing pipeline:

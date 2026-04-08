@@ -18,10 +18,9 @@ dense_embedder = SentenceTransformer(DENSE_MODEL, trust_remote_code=True) # Sema
 sparse_embedder = SparseTextEmbedding(model_name=SPARSE_MODEL)  # Keyword Matching
 
 def download_models():
-    """Download and cache both embedding models. Call this before serving if ingest.py has not been run."""
-    SentenceTransformer(DENSE_MODEL, trust_remote_code=True)
-    list(SparseTextEmbedding(model_name=SPARSE_MODEL).embed(["test"]))
-    print(f"✓ Models downloaded and cached")
+    dense_embedder = SentenceTransformer(DENSE_MODEL, trust_remote_code=True) # Semantic Matching
+    sparse_embedder = SparseTextEmbedding(model_name=SPARSE_MODEL)  # Keyword Matching
+    return dense_embedder, sparse_embedder
 
 
 def embed_chunks(chunks):

@@ -1,24 +1,28 @@
 """
-Generation Pipeline (long-running API server)
+Generation Pipeline (called by api/app.py to serve user queries)
 
 Responsibility:
-    Serves user queries by retrieving relevant news chunks from Qdrant
-    and generating grounded answers via the LLM. Runs continuously after deployment.
+    Converts a user query into a grounded LLM response by searching
+    the Qdrant vector store and passing retrieved context to the LLM.
 
 Pipeline:
     5. Embed Query    Convert the user's question into dense + sparse vectors
     6. Retrieve       Hybrid search (dense + sparse + RRF) → top-k chunks from Qdrant
     7. Generate       Build a grounded prompt and stream the LLM response to the caller
 
-When to run:
-    - On deployment, and kept alive as a long-running service
-    - Does NOT need to restart when new articles are ingested (Qdrant is shared)
-    - Restart only when generation logic or the LLM prompt changes
-
 Usage:
-    uv run serve.py
+    Called by api/app.py — not run directly.
 """
-import uvicorn
+from generation import embed_query, retrieve, generate
 
-if __name__ == "__main__":
-    uvicorn.run("api.app:app", host="0.0.0.0", port=8000, reload=True)
+COLLECTION = "testing_v1"
+
+def run_pipeline(query: str, dense_embedder, sparse_embedder, top_k: int = 10):
+    # Stage 5: Embed Query
+    dense_vector, sparse_vector = embed_query(query, dense_embedder, sparse_embedder)
+
+    # Stage 6: Retrieve
+    chunks = retrieve(COLLECTION, dense_vector, sparse_vector, top_k=top_k)
+
+    # Stage 7: Generate — yields tokens for StreamingResponse
+    return generate(query, chunks)

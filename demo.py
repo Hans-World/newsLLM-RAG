@@ -20,19 +20,21 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Display chat history
+USER_ICON, AGENT_ICON = "./images/user.png", "./images/agents.png"
 for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
+    avatar = USER_ICON if msg["role"] == "user" else AGENT_ICON
+    with st.chat_message(msg["role"], avatar=avatar):
         st.markdown(msg["content"])
 
 # Chat input
 if query := st.chat_input("請輸入您的問題..."):
     # Show user message
     st.session_state.messages.append({"role": "user", "content": query})
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar=USER_ICON):
         st.markdown(query)
 
     # Stream assistant response
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar=AGENT_ICON):
         response = st.write_stream(
             run_pipeline(query, dense_embedder, sparse_embedder)
         )

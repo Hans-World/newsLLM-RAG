@@ -17,6 +17,13 @@ SPARSE_MODEL = "Qdrant/bm25"
 dense_embedder = SentenceTransformer(DENSE_MODEL, trust_remote_code=True) # Semantic Matching
 sparse_embedder = SparseTextEmbedding(model_name=SPARSE_MODEL)  # Keyword Matching
 
+def download_models():
+    """Download and cache both embedding models. Call this before serving if ingest.py has not been run."""
+    SentenceTransformer(DENSE_MODEL, trust_remote_code=True)
+    list(SparseTextEmbedding(model_name=SPARSE_MODEL).embed(["test"]))
+    print(f"✓ Models downloaded and cached")
+
+
 def embed_chunks(chunks):
     texts = [c.text for c in chunks]
     dense_vectors = dense_embedder.encode(texts, normalize_embeddings=True, show_progress_bar=True)

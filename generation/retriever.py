@@ -2,6 +2,9 @@
 Stage 6 — Retrieve
 Hybrid search (dense + sparse + RRF) against Qdrant to find the most relevant chunks.
 
+Note: 
+    we can also set the 'score_threshold' - Minimum similarity score for returned points
+
 Approach:
     Step 1a: Dense search   — finds semantically similar chunks
     Step 1b: Sparse search  — finds keyword matching chunks
@@ -101,7 +104,7 @@ def hybrid_search(collection, query_dense_vector, query_sparse_vector, top_k=10)
         query=FusionQuery(fusion=Fusion.RRF),
         limit=top_k,
         with_payload=True,
-    ).points
+    ).points # sorted by score descending
 
     return [
         RetrievedChunk(

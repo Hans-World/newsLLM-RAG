@@ -24,17 +24,16 @@ def build_prompt(query: str, retrievedChunks: list[RetrievedChunk]) -> str:
         f"    報導時間：{rc.chunk.publish_date}"
         for i, rc in enumerate(retrievedChunks)
     )
-    return f"""你是一個可信新聞助理。請根據以下參考資料回答問題。若資料不足請說明無法確認。
+    return f"""你是一個專業的新聞助理。請根據以下規則回答使用者的問題：
+1. 若問題可以從以下參考資料中直接回答，請引用資料並提供來源連結。
+2. 若問題無法從以下參考資料中直接回答，請直接用你的知識回答，無需引用。
 
 === 參考資料 ===
 {evidence}
 
 === 問題 ===
 {query}
-
-=== 回答 ===
-[標題]: URL來源
-生成答案 """
+"""
 
 
 def generate(query: str, chunks: list[RetrievedChunk]):
@@ -47,5 +46,5 @@ def generate(query: str, chunks: list[RetrievedChunk]):
         stream=True,  # stream tokens as they arrive
     )
     for chunk in response:
-        token = chunk.choices[0].delta.content or ""
-        yield token  # yield each token to StreamingResponse
+        token = chunk.choices[0].delta.content or "" # chunk.choices[0].delta.content is the actual text piece 
+        yield token  # immediately send it to whoever called generate()

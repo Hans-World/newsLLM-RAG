@@ -3,10 +3,13 @@ Stage 4 — Store
 Save vectors + chunk metadata into Qdrant.
 """
 
+import os
+from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct, SparseVector, SparseVectorParams, SparseIndexParams, Modifier
 
-client = QdrantClient(host="localhost", port=6333)
+load_dotenv()
+client = QdrantClient(host=os.getenv("QDRANT_HOST"), port=int(os.getenv("QDRANT_PORT")))
 
 def delete_collection(collection):
     """ Delete the specified collection """

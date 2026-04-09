@@ -13,7 +13,7 @@ Pipeline:
 Usage:
     Called by api/app.py — not run directly.
 """
-from generation import embed_query, retrieve, generate
+from generation import embed_query, hybrid_search, generate
 
 COLLECTION = "testing_v1"
 
@@ -22,7 +22,7 @@ def run_pipeline(query: str, dense_embedder, sparse_embedder, top_k: int = 10):
     dense_vector, sparse_vector = embed_query(query, dense_embedder, sparse_embedder)
 
     # Stage 6: Retrieve
-    chunks = retrieve(COLLECTION, dense_vector, sparse_vector, top_k=top_k)
+    chunks = hybrid_search(COLLECTION, dense_vector, sparse_vector, top_k=top_k)
 
     # Stage 7: Generate — yields tokens for StreamingResponse
     return generate(query, chunks)

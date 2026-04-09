@@ -12,7 +12,10 @@ from dotenv import load_dotenv
 from generation.retriever import RetrievedChunk
 
 load_dotenv()
-llm = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+llm = OpenAI(
+    api_key=os.getenv("LLM_API_KEY"),
+    base_url=os.getenv("LLM_BASE_URL"),  # swap provider by changing .env — no code change needed
+)
 
 
 def build_prompt(query: str, retrievedChunks: list[RetrievedChunk]) -> str:
@@ -39,10 +42,10 @@ def build_prompt(query: str, retrievedChunks: list[RetrievedChunk]) -> str:
 def generate(query: str, chunks: list[RetrievedChunk]):
     prompt = build_prompt(query, chunks)
     response = llm.chat.completions.create(
-        model="gpt-4o-mini",
+        model=os.getenv("LLM_MODEL"),
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2,
-        max_tokens=512,
+        max_tokens=1024,
         stream=True,  # stream tokens as they arrive
     )
     for chunk in response:

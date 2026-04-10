@@ -17,7 +17,7 @@ When to run:
     - When the embedding model is changed (requires full re-index)
 
 Usage:
-    uv run ingest.py
+    uv run index.py
 
 Note: 
     Call the Qdrant API and show me all the collections
@@ -25,10 +25,7 @@ Note:
              curl -s http://localhost:6333/healthz
 """
 from pathlib import Path
-# from fastembed import SparseTextEmbedding
-# from indexing import load, chunk, embed_chunks, create_collection, delete_collection, store_chunks
-from indexing import load, chunk, create_collection, delete_collection, store_chunks
-from indexing.embedders import E5Embedder, BM25SparseEmbedder
+from indexing import load, chunk, create_collection, delete_collection, store_chunks, E5Embedder, BM25SparseEmbedder
 
 # SAMPLES_DIR = Path("./notebooks/data/news.json")
 # COLLECTION  = "testing_v1"
@@ -61,7 +58,7 @@ if __name__ == "__main__":
         # Stage 3: Embed
         # dense_vectors, sparse_vectors = embed_chunks(all_chunks)
         dense_vectors  = dense_embedder.encode_chunks(all_chunks)
-        sparse_vectors = sparse_embedder.embed_documents([c.text for c in all_chunks])
+        sparse_vectors = sparse_embedder.encode_documents([c.text for c in all_chunks])
         print(f"✓ Dense:  {len(dense_vectors)} vectors, dim={len(dense_vectors[0])}")
         print(f"✓ Sparse: {len(sparse_vectors)} vectors, nnz={len(sparse_vectors[0].indices)}")
 

@@ -71,8 +71,8 @@ class BM25SparseEmbedder:
     def __init__(self):
         self.model = SparseTextEmbedding(model_name="Qdrant/bm25")
 
-    def embed_documents(self, texts: list[str]):
+    def encode_documents(self, texts: list[str]):
         return list(self.model.embed(texts))
 
-    def embed_query(self, query: str):
+    def encode_query(self, query: str):
         return list(self.model.embed([query]))[0]

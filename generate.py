@@ -11,7 +11,7 @@ Pipeline:
     7. Generate       Build a grounded prompt and stream the LLM response to the caller
 
 Usage:
-    Called by api/app.py — not run directly.
+    Called by demo.py — not run directly.
 """
 from generation import hybrid_search, generate
 from indexing import E5Embedder, BM25SparseEmbedder
@@ -22,7 +22,6 @@ COLLECTION = "news_samples"
 
 def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, top_k: int = 10):
     # Stage 5: Embed Query
-    # dense_vector, sparse_vector = embed_query(query, dense_embedder, sparse_embedder)
     dense_vector  = dense_embedder.encode_query(query)
     sparse_vector = sparse_embedder.encode_query(query)
 

@@ -38,13 +38,13 @@ def create_collection(collection, dense_vector_dimension):
         )
 
 
-def store_chunks(collection, chunks, dense_vectors, sparse_vectors):
+def store_chunks(collection, chunks, dense_vectors, sparse_vectors, start_id: int = 0):
     points = []
     for i, chunk in enumerate(chunks):
         points.append(
             # Each chunk is stored as a record in the database (id + vector + metadata)
             PointStruct(
-                id=i, 
+                id=start_id + i,
                 vector={
                     "dense": dense_vectors[i].tolist(),
                     "sparse": SparseVector(
@@ -54,12 +54,13 @@ def store_chunks(collection, chunks, dense_vectors, sparse_vectors):
                 },
                 # metadata for citation
                 payload={
-                    "chunk_id": chunk.chunk_id,
-                    "source_id": chunk.source_id,
-                    "text":      chunk.text,
-                    "title":     chunk.title,
-                    "url":       chunk.url,
-                    "publish_date": chunk.publish_date.isoformat(),
+                    "chunk_id":     chunk.chunk_id,
+                    "source_id":    chunk.source_id,
+                    "text":         chunk.text,
+                    "title":        chunk.title,
+                    "url":          chunk.url,
+                    "publish_date": chunk.publish_date.isoformat() if chunk.publish_date else None,
+                    "source":       chunk.source,
                 }
             )
         )

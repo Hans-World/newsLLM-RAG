@@ -56,8 +56,11 @@ docker compose down
 
 ```bash
 # Check all Qdrant collections
-curl -s http://localhost:6333/collections
+curl -s http://localhost:6333/collections | python3 -m json.tool
 
 # Check Qdrant version
 curl -s http://localhost:6333
+
+# Delete Collection e.g. news_samples
+curl -X DELETE http://localhost:6333/collections/news_samples
 ```

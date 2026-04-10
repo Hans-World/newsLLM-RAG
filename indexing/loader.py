@@ -7,12 +7,13 @@ from datetime import datetime
 
 
 class RawDocument:
-    def __init__(self, id, title, text, url, publish_date):
+    def __init__(self, id, title, text, url, publish_date, source):
         self.id = id
         self.title = title
         self.text = text
         self.url = url
         self.publish_date = publish_date
+        self.source = source
 
 
 def load(path: str) -> list[RawDocument]:
@@ -21,12 +22,14 @@ def load(path: str) -> list[RawDocument]:
 
     docs = []
     for doc in raw:
+        raw_date = doc.get("publish_date")
         docs.append(RawDocument(
-            id=doc["id"],
-            title=doc["title"],
-            text=doc["content"],
-            url=doc["url"],
-            publish_date=datetime.fromisoformat(doc["publish_date"]),
+            id=doc.get("id", ""),
+            title=doc.get("title", ""),
+            text=doc.get("content", ""),
+            url=doc.get("url", ""),
+            publish_date=datetime.fromisoformat(raw_date) if raw_date else None,
+            source=doc.get("source", ""),
         ))
 
     return docs

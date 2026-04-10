@@ -47,7 +47,8 @@ def keyword_search(collection, query_sparse_vector, top_k=10):
                 text=r.payload["text"],
                 title=r.payload["title"],
                 url=r.payload["url"],
-                publish_date=datetime.fromisoformat(r.payload["publish_date"]),
+                publish_date=datetime.fromisoformat(r.payload["publish_date"]) if r.payload.get("publish_date") else None,
+                source=r.payload.get("source", ""),
             ),
             score=r.score,
         )
@@ -72,7 +73,8 @@ def semantic_search(collection, query_dense_vector, top_k=10):
                 text=r.payload["text"],
                 title=r.payload["title"],
                 url=r.payload["url"],
-                publish_date=datetime.fromisoformat(r.payload["publish_date"]),
+                publish_date=datetime.fromisoformat(r.payload["publish_date"]) if r.payload.get("publish_date") else None,
+                source=r.payload.get("source", ""),
             ),
             score=r.score,
         )
@@ -114,7 +116,8 @@ def hybrid_search(collection, query_dense_vector, query_sparse_vector, top_k=10)
                 text=r.payload["text"],
                 title=r.payload["title"],
                 url=r.payload["url"],
-                publish_date=datetime.fromisoformat(r.payload["publish_date"]),
+                publish_date=datetime.fromisoformat(r.payload["publish_date"]) if r.payload.get("publish_date") else None,
+                source=r.payload.get("source", ""),
             ),
             score=r.score,
         )

@@ -22,7 +22,8 @@ def build_prompt(query: str, retrievedChunks: list[RetrievedChunk]) -> str:
     # Notice: retrievedChunks has already been sorted in a descending order by score
     evidence = "\n\n".join(
         f"[{i+1}] 標題：{rc.chunk.title}\n"
-        f"    來源：{rc.chunk.url}\n"
+        f"    來源：{rc.chunk.source}\n"
+        f"    連結：{rc.chunk.url}\n"
         f"    內容：{rc.chunk.text}\n"
         f"    報導時間：{rc.chunk.publish_date}"
         for i, rc in enumerate(retrievedChunks)

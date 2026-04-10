@@ -3,7 +3,9 @@ Demo UI — Streamlit chatbot for testing the RAG pipeline.
 Run with: uv run streamlit run demo.py
 """
 import streamlit as st
-from indexing.doc_embedder import download_models
+# from fastembed import SparseTextEmbedding
+# from indexing.doc_embedder import download_models
+from indexing.embedders import E5Embedder, BM25SparseEmbedder
 from generate import run_pipeline
 
 st.title("NewsLLM 新聞助理")
@@ -11,7 +13,8 @@ st.title("NewsLLM 新聞助理")
 # Load embedders once and cache them
 @st.cache_resource
 def load_embedders():
-    return download_models()
+    # return download_models()
+    return E5Embedder(), BM25SparseEmbedder()
 
 dense_embedder, sparse_embedder = load_embedders()
 

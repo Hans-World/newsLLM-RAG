@@ -24,31 +24,50 @@ Note:
     command: curl -s http://localhost:6333/collections
              curl -s http://localhost:6333/healthz
 """
-from indexing import load, chunk, embed_chunks, create_collection, delet_collection, store_chunks
+from pathlib import Path
+# from fastembed import SparseTextEmbedding
+# from indexing import load, chunk, embed_chunks, create_collection, delete_collection, store_chunks
+from indexing import load, chunk, create_collection, delete_collection, store_chunks
+from indexing.embedders import E5Embedder, BM25SparseEmbedder
+
+# SAMPLES_DIR = Path("./notebooks/data/news.json")
+# COLLECTION  = "testing_v1"
+SAMPLES_DIR  = Path("./notebooks/data/samples")
+COLLECTION   = "news_samples"
 
 if __name__ == "__main__":
-    print("=== INDEXING PIPELINE ===")
-    
-    # Stage 1: Load
-    PATH = "./notebooks/data/news.json"
-    docs = load(PATH) # Potentially need to be replaced after we receive the data
-    print(f"✓ Loaded {len(docs)} documents")
-    
-    # Stage 2: Chunk
-    all_chunks = []
-    for doc in docs:
-        all_chunks.extend(chunk(doc))
-    print(f"✓ Turned {len(docs)} documents into {len(all_chunks)} chunks")
-    
-    # Stage 3: Embed
-    dense_vectors, sparse_vectors = embed_chunks(all_chunks)
-    print(f"✓ Dense:  {len(dense_vectors)} chunks, dimension={len(dense_vectors[0])}")
-    print(f"✓ Sparse: {len(sparse_vectors)} chunks, example nnz={len(sparse_vectors[0].indices)} non-zero values")
-    
-    # Stage 4: Store
-    COLLECTION = "testing_v1"
-    DENSE_VECTOR_DIM = len(dense_vectors[0])
-    create_collection(COLLECTION, DENSE_VECTOR_DIM)
-    store_chunks(COLLECTION, all_chunks, dense_vectors, sparse_vectors)
-    print(f"✓ Stored {len(all_chunks)} chunks into '{COLLECTION}'")
-    # delete_collection(COLLECTION)
+    sample_files = sorted(SAMPLES_DIR.glob("*.json"))
+    print(f"=== INDEXING PIPELINE ===")
+    print(f"Found {len(sample_files)} sample files\n")
+
+    dense_embedder  = E5Embedder()
+    sparse_embedder = BM25SparseEmbedder()
+    global_id = 0
+
+    for filepath in sample_files:
+        source = filepath.stem
+        print(f"--- [{source}] ---")
+
+        # Stage 1: Load
+        docs = load(str(filepath))
+        print(f"✓ Loaded {len(docs)} documents")
+
+        # Stage 2: Chunk
+        all_chunks = []
+        for doc in docs:
+            all_chunks.extend(chunk(doc))
+        print(f"✓ Chunked into {len(all_chunks)} chunks")
+
+        # Stage 3: Embed
+        # dense_vectors, sparse_vectors = embed_chunks(all_chunks)
+        dense_vectors  = dense_embedder.encode_chunks(all_chunks)
+        sparse_vectors = sparse_embedder.embed_documents([c.text for c in all_chunks])
+        print(f"✓ Dense:  {len(dense_vectors)} vectors, dim={len(dense_vectors[0])}")
+        print(f"✓ Sparse: {len(sparse_vectors)} vectors, nnz={len(sparse_vectors[0].indices)}")
+
+        # Stage 4: Store
+        DENSE_VECTOR_DIM = len(dense_vectors[0])
+        create_collection(COLLECTION, DENSE_VECTOR_DIM)
+        store_chunks(COLLECTION, all_chunks, dense_vectors, sparse_vectors, start_id=global_id)
+        global_id += len(all_chunks)
+        print(f"✓ Stored {len(all_chunks)} chunks into '{COLLECTION}'\n")

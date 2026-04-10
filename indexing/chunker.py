@@ -9,13 +9,14 @@ import re
 from indexing.loader import RawDocument
 
 class Chunk:
-    def __init__(self, source_id, chunk_id, text, title, url, publish_date):
+    def __init__(self, source_id, chunk_id, text, title, url, publish_date, source):
         self.source_id = source_id
         self.chunk_id = chunk_id
         self.text = text
         self.title = title
         self.url = url
         self.publish_date = publish_date
+        self.source = source
         
         
 def split_RawDocument_to_sentences(doc:RawDocument):
@@ -62,6 +63,7 @@ def chunk(doc:RawDocument, max_sentences=3, overlap_sentences=1):
             title=doc.title,
             url=doc.url,
             publish_date=doc.publish_date,
+            source=doc.source,
         ))
     
     return chunks

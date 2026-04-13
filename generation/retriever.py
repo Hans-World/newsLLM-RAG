@@ -42,11 +42,11 @@ def keyword_search(collection, query_sparse_vector, top_k=10):
     return [
         RetrievedChunk(
             chunk=Chunk(
-                chunk_id=r.payload["chunk_id"],
-                source_id=r.payload["source_id"],
-                text=r.payload["text"],
-                title=r.payload["title"],
-                url=r.payload["url"],
+                chunk_id=r.payload.get("chunk_id", ""),
+                source_id=r.payload.get("source_id", ""),
+                text=r.payload.get("text", ""),
+                title=r.payload.get("title", ""),
+                url=r.payload.get("url", ""),
                 publish_date=datetime.fromisoformat(r.payload["publish_date"]) if r.payload.get("publish_date") else None,
                 source=r.payload.get("source", ""),
             ),
@@ -68,11 +68,11 @@ def semantic_search(collection, query_dense_vector, top_k=10):
     return [
         RetrievedChunk(
             chunk=Chunk(
-                chunk_id=r.payload["chunk_id"],
-                source_id=r.payload["source_id"],
-                text=r.payload["text"],
-                title=r.payload["title"],
-                url=r.payload["url"],
+                chunk_id=r.payload.get("chunk_id", ""),
+                source_id=r.payload.get("source_id", ""),
+                text=r.payload.get("text", ""),
+                title=r.payload.get("title", ""),
+                url=r.payload.get("url", ""),
                 publish_date=datetime.fromisoformat(r.payload["publish_date"]) if r.payload.get("publish_date") else None,
                 source=r.payload.get("source", ""),
             ),
@@ -111,11 +111,11 @@ def hybrid_search(collection, query_dense_vector, query_sparse_vector, top_k=10)
     return [
         RetrievedChunk(
             chunk=Chunk(
-                chunk_id=r.payload["chunk_id"],
-                source_id=r.payload["source_id"],
-                text=r.payload["text"],
-                title=r.payload["title"],
-                url=r.payload["url"],
+                chunk_id=r.payload.get("chunk_id", ""),
+                source_id=r.payload.get("source_id", ""),
+                text=r.payload.get("text", ""),
+                title=r.payload.get("title", ""),
+                url=r.payload.get("url", ""),
                 publish_date=datetime.fromisoformat(r.payload["publish_date"]) if r.payload.get("publish_date") else None,
                 source=r.payload.get("source", ""),
             ),

@@ -60,7 +60,9 @@ if __name__ == "__main__":
         dense_vectors  = dense_embedder.encode_chunks(all_chunks)
         sparse_vectors = sparse_embedder.encode_documents([c.text for c in all_chunks])
         print(f"✓ Dense:  {len(dense_vectors)} vectors, dim={len(dense_vectors[0])}")
-        print(f"✓ Sparse: {len(sparse_vectors)} vectors, nnz={len(sparse_vectors[0].indices)}")
+        avg_nnz = sum(len(v.indices) for v in sparse_vectors) / len(sparse_vectors)
+        print(f"✓ Sparse: {len(sparse_vectors)} vectors, avg_nnz={avg_nnz:.1f}")
+        # print(f"✓ Sparse: {len(sparse_vectors)} vectors, nnz={len(sparse_vectors[0].indices)}")
 
         # Stage 4: Store
         DENSE_VECTOR_DIM = len(dense_vectors[0])

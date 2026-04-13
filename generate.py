@@ -26,7 +26,14 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
     sparse_vector = sparse_embedder.encode_query(query)
 
     # Stage 6: Retrieve
-    chunks = hybrid_search(COLLECTION, dense_vector, sparse_vector, top_k=top_k)
+    retrieved_chunks = hybrid_search(COLLECTION, dense_vector, sparse_vector, top_k=top_k)
+    print(f"--- [Retrived {top_k} Chunks] ---")
+    for i, rc in enumerate(retrieved_chunks):
+        print(f"[{i+1}] {rc.chunk.title}  |  score: {rc.score:.4f}  |  {rc.chunk.publish_date}  |  {rc.chunk.source}")
+        print(f"    {rc.chunk.url}")
+        print(f"    {rc.chunk.text[:80].strip()}...")
+        print()
 
     # Stage 7: Generate — yields tokens for StreamingResponse
-    return generate(query, chunks)
+    llm_response = generate(query, retrieved_chunks)
+    return llm_response

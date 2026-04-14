@@ -24,6 +24,15 @@ class DenseEmbedder(ABC):
     @abstractmethod
     def encode_query(self, query: str) -> list[float]: ...
 
+class BM25SparseEmbedder:
+    def __init__(self):
+        self.model = SparseTextEmbedding(model_name="Qdrant/bm25")
+
+    def encode_documents(self, texts: list[str]):
+        return list(self.model.embed(texts))
+
+    def encode_query(self, query: str):
+        return list(self.model.embed([query]))[0]
 
 class E5Embedder(DenseEmbedder):
     """
@@ -65,14 +74,3 @@ class E5Embedder(DenseEmbedder):
 #
 #     def encode_query(self, query: str) -> list[float]:
 #         return self.model.encode([query], task="retrieval", prompt_name="query")[0].tolist()
-
-
-class BM25SparseEmbedder:
-    def __init__(self):
-        self.model = SparseTextEmbedding(model_name="Qdrant/bm25")
-
-    def encode_documents(self, texts: list[str]):
-        return list(self.model.embed(texts))
-
-    def encode_query(self, query: str):
-        return list(self.model.embed([query]))[0]

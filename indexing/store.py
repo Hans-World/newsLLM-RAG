@@ -45,6 +45,7 @@ def store_chunks(collection, chunks, dense_vectors, sparse_vectors):
         points.append(
             # Each chunk is stored as a record in the database (id + vector + metadata)
             PointStruct(
+                # uuid is used for creating a unique chunk id
                 id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{chunk.source}_{chunk.chunk_id}")),
                 vector={
                     "dense": dense_vectors[i].tolist(),

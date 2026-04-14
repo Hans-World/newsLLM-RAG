@@ -39,7 +39,6 @@ if __name__ == "__main__":
 
     dense_embedder  = E5Embedder()
     sparse_embedder = BM25SparseEmbedder()
-    global_id = 0
 
     for filepath in sample_files:
         source = filepath.stem
@@ -67,6 +66,5 @@ if __name__ == "__main__":
         # Stage 4: Store
         DENSE_VECTOR_DIM = len(dense_vectors[0])
         create_collection(COLLECTION, DENSE_VECTOR_DIM)
-        store_chunks(COLLECTION, all_chunks, dense_vectors, sparse_vectors, start_id=global_id)
-        global_id += len(all_chunks)
+        store_chunks(COLLECTION, all_chunks, dense_vectors, sparse_vectors)
         print(f"✓ Stored {len(all_chunks)} chunks into '{COLLECTION}'\n")

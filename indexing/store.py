@@ -4,6 +4,7 @@ Save vectors + chunk metadata into Qdrant.
 """
 
 import os
+import uuid
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct, SparseVector, SparseVectorParams, SparseIndexParams, Modifier
@@ -38,13 +39,13 @@ def create_collection(collection, dense_vector_dimension):
         )
 
 
-def store_chunks(collection, chunks, dense_vectors, sparse_vectors, start_id: int = 0):
+def store_chunks(collection, chunks, dense_vectors, sparse_vectors):
     points = []
     for i, chunk in enumerate(chunks):
         points.append(
             # Each chunk is stored as a record in the database (id + vector + metadata)
             PointStruct(
-                id=start_id + i,
+                id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{chunk.source}_{chunk.chunk_id}")),
                 vector={
                     "dense": dense_vectors[i].tolist(),
                     "sparse": SparseVector(

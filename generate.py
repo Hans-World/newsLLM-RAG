@@ -16,9 +16,8 @@ Usage:
 from generation import hybrid_search, generate
 from indexing import E5Embedder, BM25SparseEmbedder
 
-# from generation import embed_query, hybrid_search, generate
-# COLLECTION = "testing_v1"
-COLLECTION = "news_samples"
+# Should share the same COLLECTION with index.py
+COLLECTION = "news_samples" 
 
 def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, top_k: int = 10):
     # Stage 5: Embed Query

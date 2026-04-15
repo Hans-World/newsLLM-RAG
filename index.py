@@ -18,21 +18,28 @@ When to run:
 
 Usage:
     uv run index.py
+    uv run index.py --data-dir /path/to/articles
 
-Note: 
+Note:
     Call the Qdrant API and show me all the collections
     command: curl -s http://localhost:6333/collections
              curl -s http://localhost:6333/healthz
 """
+import argparse
 from pathlib import Path
 from indexing import load, chunk, create_collection, delete_collection, store_chunks, E5Embedder, BM25SparseEmbedder
 
-# SAMPLES_DIR = Path("./notebooks/data/news.json")
-# COLLECTION  = "testing_v1"
-SAMPLES_DIR  = Path("./notebooks/data/samples")
-COLLECTION   = "news_samples"
+DEFAULT_SAMPLES_DIR = Path("./notebooks/data/samples")
+COLLECTION  = "news_samples"
 
 if __name__ == "__main__":
+    # CLI arguments for custom data source 
+    parser = argparse.ArgumentParser(description="NewsLLM Indexing Pipeline")
+    parser.add_argument("--data-dir",   type=Path, default=DEFAULT_SAMPLES_DIR, help="Directory containing JSON article files")
+    args = parser.parse_args()
+
+    SAMPLES_DIR = args.data_dir
+
     sample_files = sorted(SAMPLES_DIR.glob("*.json"))
     print(f"=== INDEXING PIPELINE ===")
     print(f"Found {len(sample_files)} sample files\n")

@@ -12,10 +12,15 @@ Sparse (BM25SparseEmbedder):
 
 To switch models: instantiate a different class — no other code changes needed.
 """
+import torch
 import numpy as np
 from abc import ABC, abstractmethod
 from sentence_transformers import SentenceTransformer
 from fastembed import SparseTextEmbedding
+
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+# RTX 3090 (24GB) comfortably fits E5-large (~2GB) with batch_size=256
+ENCODE_BATCH_SIZE = 256
 
 class DenseEmbedder(ABC):
     @abstractmethod
@@ -44,10 +49,10 @@ class E5Embedder(DenseEmbedder):
     QUERY_PREFIX = "Instruct: Given a news article query, retrieve relevant news passages\nQuery: "
 
     def __init__(self):
-        self.model = SentenceTransformer(self.MODEL, trust_remote_code=True)
+        self.model = SentenceTransformer(self.MODEL, trust_remote_code=True, device=DEVICE)
 
     def encode_documents(self, texts: list[str]) -> np.ndarray:
-        return self.model.encode(texts, normalize_embeddings=True, show_progress_bar=True)
+        return self.model.encode(texts, normalize_embeddings=True, show_progress_bar=True, batch_size=ENCODE_BATCH_SIZE)
 
     def encode_query(self, query: str) -> list[float]:
         return self.model.encode(self.QUERY_PREFIX + query, normalize_embeddings=True).tolist()
@@ -56,21 +61,3 @@ class E5Embedder(DenseEmbedder):
         """Convenience method for the indexing pipeline — extracts text from Chunk objects."""
         texts = [c.text for c in chunks]
         return self.encode_documents(texts)
-
-
-# class JinaV5Embedder(DenseEmbedder):
-#     """
-#     jinaai/jina-embeddings-v5-text-small
-#     License: CC BY-NC 4.0 (non-commercial only)
-#     Uses task/prompt_name parameters instead of instruction prefix.
-#     """
-#     MODEL = "jinaai/jina-embeddings-v5-text-small"
-#
-#     def __init__(self):
-#         self.model = SentenceTransformer(self.MODEL, trust_remote_code=True)
-#
-#     def encode_documents(self, texts: list[str]) -> np.ndarray:
-#         return self.model.encode(texts, task="retrieval", prompt_name="document", show_progress_bar=True)
-#
-#     def encode_query(self, query: str) -> list[float]:
-#         return self.model.encode([query], task="retrieval", prompt_name="query")[0].tolist()

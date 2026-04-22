@@ -27,10 +27,11 @@ Note:
 """
 import argparse
 from pathlib import Path
+from tqdm import tqdm
 from indexing import load, chunk, create_collection, delete_collection, store_chunks, E5Embedder, BM25SparseEmbedder
 
 DEFAULT_SAMPLES_DIR = Path("./notebooks/data/samples")
-COLLECTION  = "news_samples"
+COLLECTION  = "news_all" # "news_all", "news_samples", "testing_v1"
 
 if __name__ == "__main__":
     # CLI arguments for custom data source 
@@ -40,7 +41,8 @@ if __name__ == "__main__":
 
     SAMPLES_DIR = args.data_dir
 
-    sample_files = sorted(SAMPLES_DIR.glob("*.json"))
+    # Accept either a single .json file or a directory of .json files
+    sample_files = [SAMPLES_DIR] if SAMPLES_DIR.is_file() else sorted(SAMPLES_DIR.glob("*.json"))
     print(f"=== INDEXING PIPELINE ===")
     print(f"Found {len(sample_files)} sample files\n")
 
@@ -57,7 +59,7 @@ if __name__ == "__main__":
 
         # Stage 2: Chunk
         all_chunks = []
-        for doc in docs:
+        for doc in tqdm(docs, desc="Chunking", unit="doc"):
             all_chunks.extend(chunk(doc))
         print(f"✓ Chunked into {len(all_chunks)} chunks")
 

@@ -5,6 +5,7 @@ Save vectors + chunk metadata into Qdrant.
 
 import os
 import uuid
+from tqdm import tqdm
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct, SparseVector, SparseVectorParams, SparseIndexParams, Modifier
@@ -38,23 +39,23 @@ def create_collection(collection, dense_vector_dimension):
             }
         )
 
+UPSERT_BATCH_SIZE = 256
 
 def store_chunks(collection, chunks, dense_vectors, sparse_vectors):
-    points = []
-    for i, chunk in enumerate(chunks):
-        points.append(
-            # Each chunk is stored as a record in the database (id + vector + metadata)
+    # Outer: sends the amount of batch size points, then moves to next slice
+    total_batches = (len(chunks) + UPSERT_BATCH_SIZE - 1) // UPSERT_BATCH_SIZE
+    for start in tqdm(range(0, len(chunks), UPSERT_BATCH_SIZE), total=total_batches, desc="Storing", unit="batch"):
+        end = start + UPSERT_BATCH_SIZE
+        batch = [
             PointStruct(
-                # uuid is used for creating a unique chunk id
                 id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{chunk.source}_{chunk.chunk_id}")),
                 vector={
                     "dense": dense_vectors[i].tolist(),
                     "sparse": SparseVector(
                         indices=sparse_vectors[i].indices.tolist(), # WHICH positions have values
-                        values=sparse_vectors[i].values.tolist() # WHAT those values are
+                        values=sparse_vectors[i].values.tolist()    # WHAT those values are
                     )
                 },
-                # metadata for citation
                 payload={
                     "chunk_id":     chunk.chunk_id,
                     "source_id":    chunk.source_id,
@@ -65,7 +66,6 @@ def store_chunks(collection, chunks, dense_vectors, sparse_vectors):
                     "source":       chunk.source,
                 }
             )
-        )
-    
-    # Update or insert a new point to a collection
-    client.upsert(collection_name=collection, points=points)
+            for i, chunk in enumerate(chunks[start:end], start=start) # Inner: iterates each chunk in that slice
+        ]
+        client.upsert(collection_name=collection, points=batch)

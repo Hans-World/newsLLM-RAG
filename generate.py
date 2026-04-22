@@ -13,17 +13,24 @@ Pipeline:
 Usage:
     Called by demo.py — not run directly.
 """
-from generation import hybrid_search, generate
+from generation import hybrid_search, generate, rewrite_query
 from indexing import E5Embedder, BM25SparseEmbedder
 
 # Should share the same COLLECTION with index.py
 COLLECTION = "news_samples" 
 
-def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, top_k: int = 10):
+def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, top_k: int = 10, isQueryRewrite = False):
+    # Query Rewrite if needed
+    print(f"--- [User Query] ---\n[Original] : {query}")
+    if isQueryRewrite:
+        query = rewrite_query(query)
+        print(f"[Rewritten]: {query}")
+    print()
+        
     # Stage 5: Embed Query
     dense_vector  = dense_embedder.encode_query(query)
     sparse_vector = sparse_embedder.encode_query(query)
-
+        
     # Stage 6: Retrieve
     retrieved_chunks = hybrid_search(COLLECTION, dense_vector, sparse_vector, top_k=top_k)
     print(f"--- [Retrived {top_k} Chunks] ---")

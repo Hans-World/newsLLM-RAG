@@ -52,6 +52,24 @@ This runs the full indexing pipeline:
 docker compose down
 ```
 
+## Running long jobs with tmux
+
+For large indexing jobs that take a long time, use tmux so the process keeps running even if you close your terminal.
+
+```bash
+# 1. Start a named tmux session
+tmux new -s indexing
+
+# 2. Run the indexing pipeline inside the session
+uv run index.py --data-dir /path/to/your/data.json
+
+# 3. Detach from the session (job keeps running in background)
+# Press: Ctrl+b  then  d
+
+# 4. Come back later and reattach to check progress
+tmux attach -t indexing
+```
+
 ## Useful commands
 
 ```bash

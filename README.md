@@ -46,7 +46,15 @@ This runs the full indexing pipeline:
 3. Embed chunks into dense + sparse vectors
 4. Store vectors and metadata into Qdrant
 
-### 4. Stop Qdrant
+### 4. Run the demo
+
+```bash
+uv run streamlit run demo.py
+```
+
+This launches the NewsLLM conversational demo in your browser.
+
+### 5. Stop Qdrant
 
 ```bash
 docker compose down

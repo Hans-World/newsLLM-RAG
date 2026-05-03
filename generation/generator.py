@@ -17,8 +17,13 @@ llm = OpenAI(
     base_url=os.getenv("LLM_BASE_URL"),  # swap provider by changing .env — no code change needed
 )
 
+def build_system_prompt() -> str:
+    return """你是一個專業的新聞助理。請根據以下規則回答使用者的問題：
+1. 若問題可以從以下參考資料中直接回答，請引用資料並提供來源連結。
+2. 若問題無法從以下參考資料中直接回答，請直接用你的知識回答，無需引用。"""
+    
 
-def build_prompt(query: str, retrievedChunks: list[RetrievedChunk]) -> str:
+def build_user_message(query: str, retrievedChunks: list[RetrievedChunk]) -> str:
     # Notice: retrievedChunks has already been sorted in a descending order by score
     evidence = "\n\n".join(
         f"[{i+1}] 標題：{rc.chunk.title}\n"
@@ -28,11 +33,7 @@ def build_prompt(query: str, retrievedChunks: list[RetrievedChunk]) -> str:
         f"    報導時間：{rc.chunk.publish_date}"
         for i, rc in enumerate(retrievedChunks)
     )
-    return f"""你是一個專業的新聞助理。請根據以下規則回答使用者的問題：
-1. 若問題可以從以下參考資料中直接回答，請引用資料並提供來源連結。
-2. 若問題無法從以下參考資料中直接回答，請直接用你的知識回答，無需引用。
-
-=== 參考資料 ===
+    return f"""=== 參考資料 ===
 {evidence}
 
 === 問題 ===
@@ -40,11 +41,16 @@ def build_prompt(query: str, retrievedChunks: list[RetrievedChunk]) -> str:
 """
 
 
-def generate(query: str, chunks: list[RetrievedChunk]):
-    prompt = build_prompt(query, chunks)
+def generate(query: str, chunks: list[RetrievedChunk], history: list[dict] | None = None):
+    messages = [{"role": "system", "content": build_system_prompt()}]
+    if history:
+        # Both += and .extend() produce the same result
+        messages += history # Prior User/Assistant turns (raw queries, no evidence)
+    messages.append({"role": "user", "content": build_user_message(query, chunks)})
+    
     response = llm.chat.completions.create(
         model=os.getenv("LLM_MODEL"),
-        messages=[{"role": "user", "content": prompt}],
+        messages=messages,
         temperature=0.2,
         max_tokens=1024,
         stream=True,  # stream tokens as they arrive

@@ -19,7 +19,7 @@ from indexing import E5Embedder, BM25SparseEmbedder
 # Should share the same COLLECTION with index.py
 COLLECTION = "公視" 
 
-def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, top_k: int = 10, isQueryRewrite = False):
+def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, history: list[dict] | None=None, top_k: int = 10, isQueryRewrite = False):
     # Query Rewrite if needed
     print(f"--- [User Query] ---\n[Original] : {query}")
     if isQueryRewrite:
@@ -41,5 +41,5 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
         print()
 
     # Stage 7: Generate — yields tokens for StreamingResponse
-    llm_response = generate(query, retrieved_chunks)
+    llm_response = generate(query, retrieved_chunks, history)
     return llm_response

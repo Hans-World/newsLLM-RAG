@@ -28,6 +28,9 @@ for msg in st.session_state.messages:
 
 # Chat input
 if query := st.chat_input("請輸入您的問題..."):
+    # Snapshot history BEFORE appending current turn - these are the prior raw queries/answers 
+    history = list(st.session_state.messages)
+    
     # Show user message
     st.session_state.messages.append({"role": "user", "content": query})
     with st.chat_message("user", avatar=USER_ICON):
@@ -36,7 +39,7 @@ if query := st.chat_input("請輸入您的問題..."):
     # Stream assistant response
     with st.chat_message("assistant", avatar=AGENT_ICON):
         response = st.write_stream(
-            run_pipeline(query, dense_embedder, sparse_embedder)
+            run_pipeline(query, dense_embedder, sparse_embedder, history=history)
         )
 
     st.session_state.messages.append({"role": "assistant", "content": response})

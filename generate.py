@@ -42,4 +42,4 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
 
     # Stage 7: Generate — yields tokens for StreamingResponse
     llm_response = generate(query, retrieved_chunks, history)
-    return llm_response
+    return llm_response, retrieved_chunks # expose chunks for eval

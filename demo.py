@@ -38,8 +38,8 @@ if query := st.chat_input("請輸入您的問題..."):
 
     # Stream assistant response
     with st.chat_message("assistant", avatar=AGENT_ICON):
-        response = st.write_stream(
-            run_pipeline(query, dense_embedder, sparse_embedder, history=history)
-        )
+        # # retrieved_chunks kept for eval (Recall@K), not shown to user
+        llm_stream, retrieved_chunks = run_pipeline(query, dense_embedder, sparse_embedder, history=history)
+        response = st.write_stream(llm_stream)
 
     st.session_state.messages.append({"role": "assistant", "content": response})

@@ -6,9 +6,9 @@ Note:
     we can also set the 'score_threshold' - Minimum similarity score for returned points
 
 Approach:
-    Step 1a: Dense search   — finds semantically similar chunks
-    Step 1b: Sparse search  — finds keyword matching chunks
-    Step 2:  RRF fusion     — merges both ranked lists into one final ranking
+    Step 1a: Dense search                 — finds semantically similar chunks
+    Step 1b: Sparse search                — finds keyword matching chunks
+    Step 2:  Reciprocal Rank Fusion (RRF) — merges both ranked lists into one final ranking
 """
 import os
 from datetime import datetime

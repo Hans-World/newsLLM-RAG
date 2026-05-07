@@ -6,6 +6,10 @@ A RAG (Retrieval-Augmented Generation) pipeline for Chinese news articles using 
 
 ![RAG Pipeline](images/RAG_pipeline.png)
 
+## Demo
+
+[Watch the demo video](https://drive.google.com/file/d/1h8pG7CeFAW4XPiZULhn-QBsS8VJbizFs/view?usp=sharing)
+
 ## Prerequisites
 
 - [uv](https://docs.astral.sh/uv/getting-started/installation/) — Python package manager

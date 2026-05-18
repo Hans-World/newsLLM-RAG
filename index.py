@@ -28,10 +28,10 @@ Note:
 import argparse
 from pathlib import Path
 from tqdm import tqdm
-from indexing import load, chunk, create_collection, delete_collection, store_chunks, E5Embedder, BM25SparseEmbedder
+from indexing import load, init_db, save_articles, chunk, create_collection, delete_collection, store_chunks, E5Embedder, BM25SparseEmbedder
 
-DEFAULT_SAMPLES_DIR = Path("./notebooks/data/samples")
-COLLECTION  = "公視" # "news_all", "news_samples", "testing_v1", "公視"
+DEFAULT_SAMPLES_DIR = Path("./notebooks/data/")
+COLLECTION  = "test_all_media" # "news_all", "news_samples", "testing_v1", "公視", test_all_media
 
 if __name__ == "__main__":
     # CLI arguments for custom data source 
@@ -49,6 +49,8 @@ if __name__ == "__main__":
     dense_embedder  = E5Embedder()
     sparse_embedder = BM25SparseEmbedder()
 
+    init_db()  # create SQLite table once before processing files
+    
     for filepath in sample_files:
         source = filepath.stem
         print(f"--- [{source}] ---")
@@ -56,6 +58,10 @@ if __name__ == "__main__":
         # Stage 1: Load
         docs = load(str(filepath))
         print(f"✓ Loaded {len(docs)} documents")
+        
+        # Stage 1.5: Save parent documents to SQLites
+        save_articles(docs)
+        print(f"✓ Saved {len(docs)} parent documents to SQLite")
 
         # Stage 2: Chunk
         all_chunks = []
@@ -72,7 +78,7 @@ if __name__ == "__main__":
         print(f"✓ Sparse: {len(sparse_vectors)} vectors, avg_nnz={avg_nnz:.1f}")
         # print(f"✓ Sparse: {len(sparse_vectors)} vectors, nnz={len(sparse_vectors[0].indices)}")
 
-        # Stage 4: Store
+        # Stage 4: Store Chunks
         DENSE_VECTOR_DIM = len(dense_vectors[0])
         create_collection(COLLECTION, DENSE_VECTOR_DIM)
         store_chunks(COLLECTION, all_chunks, dense_vectors, sparse_vectors)

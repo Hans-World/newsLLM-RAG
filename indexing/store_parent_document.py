@@ -67,4 +67,4 @@ def fetch_articles(source_ids: list[str]):
         ).fetchall()
     # for r in rows:
     #     print(r)
-    return {row[0]: row[1] for row in rows} # converts a list of tuples into a dictionary {source_id, parent article}
+    return {row[0]: row[1] for row in rows} # converts a list of tuples into a dictionary {source_id: parent article}

@@ -20,6 +20,14 @@ from indexing import fetch_articles, E5Embedder, BM25SparseEmbedder
 COLLECTION = "test_all_media" 
 
 def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, history: list[dict] | None=None, top_k: int = 10, isQueryRewrite = False):
+    """
+    Full RAG pipeline for demo and testing purposes.
+    Retrieved relevant chunks and generates an LLM response internally.
+    
+    Use this for:
+        - Streamlit demo
+        - Local testing and evaluation
+    """
     # Query Rewrite if needed
     print(f"--- [User Query] ---\n[Original] : {query}")
     if isQueryRewrite:
@@ -48,3 +56,27 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
     # Stage 7: Generate — yields tokens for StreamingResponse
     llm_response = generate(query, retrieved_chunks, history)
     return llm_response, retrieved_chunks # expose chunks for eval
+
+
+def run_RAG(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, history: list[dict] | None=None, top_k: int = 10, isQueryRewrite = False):
+    """
+    Pure retrieval pipeline for production deployment.
+    Decouples retrieval from generation - caller brings their own LLM
+    
+    Use this for:
+        - FastAPI deployment
+        - Downstream task 1: pipe retrieved_chunks to a pre-trained and fine-tuned LLM for Q&A
+        - Downstream task 2: pipe parent_docs to a news analysis/explanation module (Polar-Chain)
+    """
+    # Stage 5: Embed Query
+    dense_vector  = dense_embedder.encode_query(query)
+    sparse_vector = sparse_embedder.encode_query(query)
+    
+    # Stage 6: Retrieve
+    retrieved_chunks = hybrid_search(COLLECTION, dense_vector, sparse_vector, top_k=top_k)
+    
+    # Stage 6.5: Fetch Parent Documents
+    source_ids = list({rc.chunk.source_id for rc in retrieved_chunks}) # removes duplicates before hitting SQLite
+    parent_docs = fetch_articles(source_ids)
+    
+    return retrieved_chunks, parent_docs

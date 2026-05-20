@@ -9,6 +9,7 @@ from indexing.loader import RawDocument
 # Anchor the .db file to the project root regardless of where you run the script from
 _PROJECT_ROOT = Path(__file__).parent.parent # Project Root
 
+# os.getenv(key, default) checks for an environment variable first, and falss back to a default if it's not set.
 DB_PATH = os.getenv("ARTICLE_DB_PATH", str(_PROJECT_ROOT / "notebooks" / "data" / "articles.db"))
 
 def _connect() -> sqlite3.Connection:
@@ -47,8 +48,23 @@ def save_articles(docs: list[RawDocument]):
             [(doc.id, doc.text) for doc in docs]
         )
         
-def fetch_articles():
+def fetch_articles(source_ids: list[str]):
     """
+    Look up full parent articles from SQLite using source_ids retrieved from Qdrant
     
+    Args: 
+        source_ids: list of source id from retrieved chunks 
+    Returns:
+        dict mapping source_id to full article text
     """
-    return
+    placeholders = ",".join("?" * len(source_ids))
+    # print(source_ids)
+    # print(placeholders)
+    with _connect() as conn:
+        rows = conn.execute(
+            f"SELECT source_id, text FROM articles WHERE source_id IN ({placeholders})",
+            source_ids
+        ).fetchall()
+    # for r in rows:
+    #     print(r)
+    return {row[0]: row[1] for row in rows} # converts a list of tuples into a dictionary {source_id, parent article}

@@ -14,7 +14,7 @@ Usage:
     Called by demo.py — not run directly.
 """
 from generation import hybrid_search, generate, rewrite_query
-from indexing import E5Embedder, BM25SparseEmbedder
+from indexing import fetch_articles, E5Embedder, BM25SparseEmbedder
 
 # Should share the same COLLECTION with index.py
 COLLECTION = "test_all_media" 
@@ -34,11 +34,16 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
     # Stage 6: Retrieve
     retrieved_chunks = hybrid_search(COLLECTION, dense_vector, sparse_vector, top_k=top_k)
     print(f"--- [Retrived {top_k} Chunks] ---")
+    source_ids = []
     for i, rc in enumerate(retrieved_chunks):
+        source_ids.append(rc.chunk.source_id)
         print(f"[{i+1}] {rc.chunk.title}  |  score: {rc.score:.4f}  |  {rc.chunk.publish_date}  |  {rc.chunk.source}")
         print(f"    {rc.chunk.url}")
         print(f"    {rc.chunk.text[:80].strip()}...")
         print()
+        
+    # Stage 6.5: Fetch Parent Documents from Retrieved Chunks
+    parent_docs = fetch_articles(source_ids)
 
     # Stage 7: Generate — yields tokens for StreamingResponse
     llm_response = generate(query, retrieved_chunks, history)

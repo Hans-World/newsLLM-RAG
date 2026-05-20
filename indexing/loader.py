@@ -24,7 +24,7 @@ def load(path: str) -> list[RawDocument]:
     for doc in raw:
         raw_date = doc.get("publish_date")
         docs.append(RawDocument(
-            id=doc.get("id", ""),
+            id=str(doc.get("id", "")), # Force the source_id to be string type
             title=doc.get("title", ""),
             text=doc.get("content", ""),
             url=doc.get("url", ""),

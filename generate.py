@@ -58,7 +58,7 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
     return llm_response, retrieved_chunks # expose chunks for eval
 
 
-def run_RAG(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, history: list[dict] | None=None, top_k: int = 10, isQueryRewrite = False):
+def run_RAG(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, top_k: int = 10):
     """
     Pure retrieval pipeline for production deployment.
     Decouples retrieval from generation - caller brings their own LLM

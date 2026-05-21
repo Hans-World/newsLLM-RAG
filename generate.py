@@ -17,7 +17,7 @@ from generation import hybrid_search, generate, rewrite_query
 from indexing import fetch_articles, E5Embedder, BM25SparseEmbedder
 
 # Should share the same COLLECTION with index.py
-COLLECTION = "test_all_media" 
+COLLECTION = "all_news" # "test_all_media", "all_news"
 
 def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, history: list[dict] | None=None, top_k: int = 10, isQueryRewrite = False):
     """

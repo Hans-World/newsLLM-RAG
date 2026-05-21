@@ -31,7 +31,7 @@ from tqdm import tqdm
 from indexing import load, init_db, save_articles, chunk, create_collection, delete_collection, store_chunks, E5Embedder, BM25SparseEmbedder
 
 DEFAULT_SAMPLES_DIR = Path("./notebooks/data/")
-COLLECTION  = "test_all_media" # "news_all", "news_samples", "testing_v1", "公視", test_all_media
+COLLECTION  = "all_news" # "all_news", "test_all_media"
 
 if __name__ == "__main__":
     # CLI arguments for custom data source 

@@ -5,11 +5,13 @@ Save full articles to SQLite so they can be fetched after retrieval for parent-d
 import sqlite3, os 
 from pathlib import Path
 from indexing.loader import RawDocument
+from dotenv import load_dotenv
 
 # Anchor the .db file to the project root regardless of where you run the script from
 _PROJECT_ROOT = Path(__file__).parent.parent # Project Root
 
 # os.getenv(key, default) checks for an environment variable first, and falss back to a default if it's not set.
+load_dotenv() # Read the .env file 
 DB_PATH = os.getenv("ARTICLE_DB_PATH", str(_PROJECT_ROOT / "notebooks" / "data" / "articles.db"))
 
 def _connect() -> sqlite3.Connection:

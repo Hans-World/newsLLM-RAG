@@ -60,7 +60,7 @@ def query(request: QueryRequest):
         top_k           = request.top_k,
     )
     chunks = [
-        ChunkResponse(
+        ChunkResponse( 
             chunk_id     = rc.chunk.chunk_id,
             source_id    = rc.chunk.source_id,
             text         = rc.chunk.text,

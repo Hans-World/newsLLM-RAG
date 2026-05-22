@@ -14,3 +14,6 @@ wheels/
 
 # Qdrant runtime storage
 qdrant_storage/
+
+# News Articles Database
+articles.db

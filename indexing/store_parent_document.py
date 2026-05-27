@@ -6,6 +6,7 @@ import sqlite3, os
 from pathlib import Path
 from indexing.loader import RawDocument
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 # Anchor the .db file to the project root regardless of where you run the script from
 _PROJECT_ROOT = Path(__file__).parent.parent # Project Root
@@ -42,14 +43,17 @@ def init_db():
         """)
         
 def save_articles(docs: list[RawDocument]):
+    BATCH_SIZE = 1000
     # open connection, auto-commit on exit
     with _connect() as conn:
-        # Safe to re-run the indexing pipeline without creating duplicates
-        conn.executemany(
-            "INSERT OR REPLACE INTO articles (source_id, text) VALUES (?, ?)",
-            [(doc.id, doc.text) for doc in docs]
-        )
-        
+        for i in tqdm(range(0, len(docs), BATCH_SIZE), desc="Saving articles", unit="batch"):
+            batch = docs[i: i + BATCH_SIZE]
+            # Safe to re-run the indexing pipeline without creating duplicates
+            conn.executemany(
+                "INSERT OR REPLACE INTO articles (source_id, text) VALUES (?, ?)",
+                [(doc.id, doc.text) for doc in batch]
+            )
+            
 def fetch_articles(source_ids: list[str]):
     """
     Look up full parent articles from SQLite using source_ids retrieved from Qdrant

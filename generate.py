@@ -17,7 +17,7 @@ from generation import hybrid_search, generate, rewrite_query
 from indexing import fetch_articles, E5Embedder, BM25SparseEmbedder
 
 # Should share the same COLLECTION with index.py
-COLLECTION = "all_news" # "test_all_media", "all_news"
+COLLECTION = "test_all_media" # "test_all_media", "all_news"
 
 def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25SparseEmbedder, history: list[dict] | None=None, top_k: int = 10, isQueryRewrite = False):
     """
@@ -45,9 +45,12 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
     source_ids = []
     for i, rc in enumerate(retrieved_chunks):
         source_ids.append(rc.chunk.source_id)
-        print(f"[{i+1}] {rc.chunk.title}  |  score: {rc.score:.4f}  |  {rc.chunk.publish_date}  |  {rc.chunk.source}")
-        print(f"    {rc.chunk.url}")
-        print(f"    {rc.chunk.text[:80].strip()}...")
+        print(f"[{i+1}] 標題：{rc.chunk.title}  |  score: {rc.score:.4f}")
+        print(f"    來源：{rc.chunk.source}")
+        print(f"    報導時間：{rc.chunk.publish_date}")
+        print(f"    連結：{rc.chunk.url}")
+        # print(f"    內容：{rc.chunk.text[:80].strip()}...")
+        print(f"    內容：{rc.chunk.text}")
         print()
         
     # Stage 6.5: Fetch Parent Documents from Retrieved Chunks

@@ -19,7 +19,7 @@ llm = OpenAI(
 
 def build_system_prompt() -> str:
     return """你是一個專業的新聞助理。請根據以下規則回答使用者的問題：
-1. 若問題可以從以下參考資料中直接回答，請引用資料並提供來源連結。
+1. 若問題可以從以下參考資料中直接回答，請引用參考資料 。
 2. 若問題無法從以下參考資料中直接回答，請直接用你的知識回答，無需引用。"""
     
 
@@ -33,11 +33,11 @@ def build_user_message(query: str, retrievedChunks: list[RetrievedChunk]) -> str
         f"    報導時間：{rc.chunk.publish_date}"
         for i, rc in enumerate(retrievedChunks)
     )
-    return f"""=== 參考資料 ===
-{evidence}
-
-=== 問題 ===
+    return f"""=== 問題 ===
 {query}
+
+=== 參考資料 ===
+{evidence}
 """
 
 

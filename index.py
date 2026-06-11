@@ -51,6 +51,9 @@ if __name__ == "__main__":
 
     init_db()  # create SQLite table once before processing files
     
+    # ===[ Pipeline streaming batching ]===
+    CHUNK_BATCH_SIZE = 50000
+    
     for filepath in sample_files:
         source = filepath.stem
         print(f"--- [{source}] ---")
@@ -62,24 +65,53 @@ if __name__ == "__main__":
         # Stage 1.5: Save parent documents to SQLites
         save_articles(docs)
         print(f"✓ Saved {len(docs)} parent documents to SQLite")
-
+        
+        # Stages 2 → 3 → 4: stream chunk → embed → store
+        total_chunks = 0
+        chunk_batch = []
+        
         # Stage 2: Chunk
-        all_chunks = []
-        for doc in tqdm(docs, desc="Chunking", unit="doc"):
-            all_chunks.extend(chunk(doc))
-        print(f"✓ Chunked into {len(all_chunks)} chunks")
+        for doc in tqdm(docs, desc="Processing", unit="doc"):
+            chunk_batch.extend(chunk(doc))
+            # Stage 3: Embed 
+            if len(chunk_batch) >= CHUNK_BATCH_SIZE:
+                dense_vectors  = dense_embedder.encode_chunks(chunk_batch)
+                sparse_vectors = sparse_embedder.encode_documents([c.text for c in chunk_batch])
+                
+                # Stage 4: Store
+                DENSE_VECTOR_DIM = len(dense_vectors[0])
+                create_collection(COLLECTION, DENSE_VECTOR_DIM)
+                store_chunks(COLLECTION, chunk_batch, dense_vectors, sparse_vectors)
+                total_chunks += len(chunk_batch)
+                chunk_batch.clear()
+                
+        # Flush the last partial chunk_batch
+        if chunk_batch:
+            dense_vectors  = dense_embedder.encode_chunks(chunk_batch)
+            sparse_vectors = sparse_embedder.encode_documents([c.text for c in chunk_batch])
+            DENSE_VECTOR_DIM = len(dense_vectors[0])
+            create_collection(COLLECTION, DENSE_VECTOR_DIM)
+            store_chunks(COLLECTION, chunk_batch, dense_vectors, sparse_vectors)
+            total_chunks += len(chunk_batch)    
+        print(f"✓ Indexed {total_chunks} chunks into '{COLLECTION}'\n")
+    
+        # # Stage 2: Chunk
+        # all_chunks = []
+        # for doc in tqdm(docs, desc="Chunking", unit="doc"):
+        #     all_chunks.extend(chunk(doc))
+        # print(f"✓ Chunked into {len(all_chunks)} chunks")
 
-        # Stage 3: Embed
-        # dense_vectors, sparse_vectors = embed_chunks(all_chunks)
-        dense_vectors  = dense_embedder.encode_chunks(all_chunks)
-        sparse_vectors = sparse_embedder.encode_documents([c.text for c in all_chunks])
-        print(f"✓ Dense:  {len(dense_vectors)} vectors, dim={len(dense_vectors[0])}")
-        avg_nnz = sum(len(v.indices) for v in sparse_vectors) / len(sparse_vectors)
-        print(f"✓ Sparse: {len(sparse_vectors)} vectors, avg_nnz={avg_nnz:.1f}")
-        # print(f"✓ Sparse: {len(sparse_vectors)} vectors, nnz={len(sparse_vectors[0].indices)}")
+        # # Stage 3: Embed
+        # # dense_vectors, sparse_vectors = embed_chunks(all_chunks)
+        # dense_vectors  = dense_embedder.encode_chunks(all_chunks)
+        # sparse_vectors = sparse_embedder.encode_documents([c.text for c in all_chunks])
+        # print(f"✓ Dense:  {len(dense_vectors)} vectors, dim={len(dense_vectors[0])}")
+        # avg_nnz = sum(len(v.indices) for v in sparse_vectors) / len(sparse_vectors)
+        # print(f"✓ Sparse: {len(sparse_vectors)} vectors, avg_nnz={avg_nnz:.1f}")
+        # # print(f"✓ Sparse: {len(sparse_vectors)} vectors, nnz={len(sparse_vectors[0].indices)}")
 
-        # Stage 4: Store Chunks
-        DENSE_VECTOR_DIM = len(dense_vectors[0])
-        create_collection(COLLECTION, DENSE_VECTOR_DIM)
-        store_chunks(COLLECTION, all_chunks, dense_vectors, sparse_vectors)
-        print(f"✓ Stored {len(all_chunks)} chunks into '{COLLECTION}'\n")
+        # # Stage 4: Store Chunks
+        # DENSE_VECTOR_DIM = len(dense_vectors[0])
+        # create_collection(COLLECTION, DENSE_VECTOR_DIM)
+        # store_chunks(COLLECTION, all_chunks, dense_vectors, sparse_vectors)
+        # print(f"✓ Stored {len(all_chunks)} chunks into '{COLLECTION}'\n")

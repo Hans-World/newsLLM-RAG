@@ -20,6 +20,8 @@ from fastembed import SparseTextEmbedding
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # RTX 3090 (24GB) comfortably fits E5-large (~2GB) with batch_size=256
+
+ # ===[ GPU Level Batching ]===
 ENCODE_BATCH_SIZE = 256
 
 class DenseEmbedder(ABC):

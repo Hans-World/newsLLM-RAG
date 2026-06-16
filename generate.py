@@ -41,23 +41,23 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
         
     # Stage 6: Retrieve
     retrieved_chunks = hybrid_search(COLLECTION, dense_vector, sparse_vector, top_k=top_k)
-    print(f"--- [Retrived {top_k} Chunks] ---")
-    source_ids = []
+        
+    # Stage 6.5: Fetch Parent Documents from Retrieved Chunks
+    source_ids = list({rc.chunk.source_id for rc in retrieved_chunks})  # deduplicate
+    parent_docs = fetch_articles(source_ids)
+    
+    print(f"--- [Retrieved {top_k} Chunks → {len(parent_docs)} Unique Articles] ---")
     for i, rc in enumerate(retrieved_chunks):
-        source_ids.append(rc.chunk.source_id)
         print(f"[{i+1}] 標題：{rc.chunk.title}  |  score: {rc.score:.4f}")
         print(f"    來源：{rc.chunk.source}")
         print(f"    報導時間：{rc.chunk.publish_date}")
         print(f"    連結：{rc.chunk.url}")
-        # print(f"    內容：{rc.chunk.text[:80].strip()}...")
-        print(f"    內容：{rc.chunk.text}")
+        print(f"    召回片段：\n    {rc.chunk.text}")
+        print(f"    完整內容：\n    {parent_docs.get(rc.chunk.source_id, "")}")
         print()
-        
-    # Stage 6.5: Fetch Parent Documents from Retrieved Chunks
-    parent_docs = fetch_articles(source_ids)
 
     # Stage 7: Generate — yields tokens for StreamingResponse
-    llm_response = generate(query, retrieved_chunks, history)
+    llm_response = generate(query, retrieved_chunks, parent_docs, history)
     return llm_response, retrieved_chunks # expose chunks for eval
 
 

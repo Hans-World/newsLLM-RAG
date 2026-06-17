@@ -29,11 +29,11 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
         - Local testing and evaluation
     """
     # Query Rewrite if needed
-    print(f"--- [User Query] ---\n[Original] : {query}")
-    if isQueryRewrite:
-        query = rewrite_query(query)
-        print(f"[Rewritten]: {query}")
-    print()
+    # print(f"--- [User Query] ---\n[Original] : {query}")
+    # if isQueryRewrite:
+    #     query = rewrite_query(query)
+    #     print(f"[Rewritten]: {query}")
+    # print()
         
     # Stage 5: Embed Query
     dense_vector  = dense_embedder.encode_query(query)
@@ -46,15 +46,15 @@ def run_pipeline(query: str, dense_embedder: E5Embedder, sparse_embedder: BM25Sp
     source_ids = list({rc.chunk.source_id for rc in retrieved_chunks})  # deduplicate
     parent_docs = fetch_articles(source_ids)
     
-    print(f"--- [Retrieved {top_k} Chunks → {len(parent_docs)} Unique Articles] ---")
-    for i, rc in enumerate(retrieved_chunks):
-        print(f"[{i+1}] 標題：{rc.chunk.title}  |  score: {rc.score:.4f}")
-        print(f"    來源：{rc.chunk.source}")
-        print(f"    報導時間：{rc.chunk.publish_date}")
-        print(f"    連結：{rc.chunk.url}")
-        print(f"    召回片段：\n    {rc.chunk.text}")
-        print(f"    完整內容：\n    {parent_docs.get(rc.chunk.source_id, "")}")
-        print()
+    # print(f"--- [Retrieved {top_k} Chunks → {len(parent_docs)} Unique Articles] ---")
+    # for i, rc in enumerate(retrieved_chunks):
+    #     print(f"[{i+1}] 新聞標題：{rc.chunk.title}  |  score: {rc.score:.4f}")
+    #     print(f"    新聞來源：{rc.chunk.source}")
+    #     print(f"    報導時間：{rc.chunk.publish_date}")
+    #     print(f"    報導連結：{rc.chunk.url}")
+    #     print(f"    召回片段：\n    {rc.chunk.text}")
+    #     print(f"    完整內容：\n    {parent_docs.get(rc.chunk.source_id, "")}")
+    #     print()
 
     # Stage 7: Generate — yields tokens for StreamingResponse
     llm_response = generate(query, retrieved_chunks, parent_docs, history)

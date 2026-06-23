@@ -25,21 +25,26 @@ Note:
     command: curl -s http://localhost:6333/collections
              curl -s http://localhost:6333/healthz
 """
-import argparse
+import argparse, os
 from pathlib import Path
 from tqdm import tqdm
 from indexing import load, init_db, save_articles, chunk, create_collection, delete_collection, store_chunks, E5Embedder, BM25SparseEmbedder
 
 DEFAULT_SAMPLES_DIR = Path("./notebooks/data/")
-COLLECTION  = "all_news" # "all_news", "test_all_media"
+COLLECTION  = "test_all_media" # "all_news", "test_all_media"
 
 if __name__ == "__main__":
     # CLI arguments for custom data source 
     parser = argparse.ArgumentParser(description="NewsLLM Indexing Pipeline")
     parser.add_argument("--data-dir",   type=Path, default=DEFAULT_SAMPLES_DIR, help="Directory containing JSON article files")
+    parser.add_argument("--collection", type=str, default=COLLECTION)
+    parser.add_argument("--db-path",    type=str,  default=None)
     args = parser.parse_args()
 
+    COLLECTION = args.collection
     SAMPLES_DIR = args.data_dir
+    if args.db_path:                                                        # ← add
+        os.environ["ARTICLE_DB_PATH"] = args.db_path
 
     # Accept either a single .json file or a directory of .json files
     sample_files = [SAMPLES_DIR] if SAMPLES_DIR.is_file() else sorted(SAMPLES_DIR.glob("*.json"))

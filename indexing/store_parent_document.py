@@ -13,14 +13,15 @@ _PROJECT_ROOT = Path(__file__).parent.parent # Project Root
 
 # os.getenv(key, default) checks for an environment variable first, and falss back to a default if it's not set.
 load_dotenv() # Read the .env file 
-DB_PATH = os.getenv("ARTICLE_DB_PATH", str(_PROJECT_ROOT / "notebooks" / "data" / "articles.db"))
+# DB_PATH = os.getenv("ARTICLE_DB_PATH", str(_PROJECT_ROOT / "notebooks" / "data" / "articles.db"))
 
 def _connect() -> sqlite3.Connection:
     """
     One place to change connection settings if needed later
     This creates the .db file on disk if it doesn't exist yet
     """
-    return sqlite3.connect(DB_PATH)
+    db_path = os.getenv("ARTICLE_DB_PATH", str(_PROJECT_ROOT / "notebooks" / "data" / "articles.db"))
+    return sqlite3.connect(db_path)
 
 def init_db():
     # open connection, auto-commit on exit

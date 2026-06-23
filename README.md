@@ -44,8 +44,15 @@ curl -s http://localhost:6333/healthz
 uv run index.py
 ```
 
+```bash
+uv run index.py \
+  --data-dir   ./notebooks/evaluation/drcd.json \
+  --collection mediatek \
+  --db-path    ./notebooks/evaluation/drcd_articles.db
+```
+
 This runs the full indexing pipeline:
-1. Load raw news articles from `notebooks/data/news.json`
+1. Load raw news articles from `--data-dir`
 2. Chunk each article into sentence windows
 3. Embed chunks into dense + sparse vectors
 4. Store vectors and metadata into Qdrant

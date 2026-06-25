@@ -1,6 +1,7 @@
 """
-FastAPI wrapper for the RAG retrieval pipeline.
-Exposes run_RAG as a REST endpoint for downstream LLM tasks.
+This file takes core pipeline (run_RAG from generate) and makes it callable via HTTP.
+Now this file runs as a server, and any client(browser, app, another service) can send 
+a query and get back news chunks. Exposes run_RAG as a REST endpoint for downstream LLM tasks.
 
 Run with: uv run fastapi dev api/app.py
 """
@@ -10,6 +11,14 @@ from pydantic import BaseModel
 from generate import run_RAG
 from indexing import E5Embedder, BM25SparseEmbedder
 
+# --- [How API, REST, and FastAPI fit together] ---
+# 1. API (Application Programming Interface) is the general concept: 
+# a defined cnotract for how two pieces of software talk to each other
+# 2. REST (Representation State Transfer): is the common style for web API 
+# design. It uses HTTP methods as verbs: 
+# - GET /health - read-only check, no body needed
+# - POST /query - send data (query string), get data back
+# 2. FastAPI: is the Python framework that handles all the HTTP plumbing
 
 # --- Request / Response models --- #
 
@@ -22,7 +31,7 @@ class ChunkResponse(BaseModel):
     source_id:    str
     text:         str
     title:        str
-    url:          str
+    url:          str | None
     publish_date: str | None
     source:       str
     score:        float
@@ -59,6 +68,8 @@ def query(request: QueryRequest):
         sparse_embedder = embedders["sparse"],
         top_k           = request.top_k,
     )
+    
+    # Unpack RetrievedChunk objects (rc.chunk, rc.score) into serializable Pydantic models for the HTTP response
     chunks = [
         ChunkResponse( 
             chunk_id     = rc.chunk.chunk_id,

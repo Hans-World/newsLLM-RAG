@@ -18,8 +18,12 @@ from qdrant_client.models import SparseVector, Prefetch, FusionQuery, Fusion
 from indexing.chunker import Chunk
 
 load_dotenv()
-client = QdrantClient(host=os.getenv("QDRANT_HOST"), port=int(os.getenv("QDRANT_PORT")))
-
+if os.getenv("QDRANT_URL"):
+    # Run on Qdrant Cloud
+    client = QdrantClient(url=os.getenv("QDRANT_URL"), api_key=os.getenv("QDRANT_API_KEY"))
+else: 
+    # Run on local server
+    client = QdrantClient(host=os.getenv("QDRANT_HOST"), port=int(os.getenv("QDRANT_PORT")))
 
 class RetrievedChunk:
     def __init__(self, chunk, score):

@@ -1,0 +1,32 @@
+# Secrets — never in an image
+.env
+
+# Local Python environment — container builds its own
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Local Qdrant data — 17GB, using Qdrant Cloud instead
+qdrant_storage/
+
+# Notebooks — excluded as a folder, but exceptions below for the db files
+# ! is exception
+notebooks/
+!notebooks/evaluation/drcd_articles.db
+!notebooks/data/articles.db
+!notebooks/evaluation/rag_eval.ipynb
+
+# SQLite WAL files
+*.db-shm
+*.db-wal
+articles.db
+
+# Git history
+.git/
+.gitignore
+
+# Misc
+README.md
+LICENSE
+.python-version
